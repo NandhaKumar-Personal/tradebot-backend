@@ -1,38 +1,52 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const cors = require('cors'); // Import cors
-const authRoutes = require('./app/routes/authRoutes');
-const userRoutes = require('./app/routes/userRoutes');
-const roleRoutes = require('./app/routes/roleRoutes');
+const express = require("express");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpecs = require("./app/config/swagger");
+const dotenv = require("dotenv");
+const cors = require("cors"); // Import CORS for cross-origin resource sharing
+const userRoutes = require("./app/routes/userRoutes");
+const morgan = require("morgan"); // Import Morgan for HTTP request logging
+const logger = require("./app/utils/logger"); // Custom logger
 
-dotenv.config();
+dotenv.config(); // Load environment variables from .env file
 
 const app = express();
 
-// Aktifkan middleware CORS untuk semua rute
-app.use(cors()); 
+// Enable CORS for all routes
+app.use(cors());
 
-// Atau jika ingin menggunakan konfigurasi khusus:
+// Optional: Use specific CORS options
 // const corsOptions = {
-//   origin: 'http://localhost:3000', // Ganti dengan domain yang diizinkan
+//   origin: 'http://localhost:3000', // Replace with the allowed domain
 //   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 //   allowedHeaders: ['Content-Type', 'Authorization'],
 // };
 // app.use(cors(corsOptions));
 
+// Parse incoming JSON requests
 app.use(express.json());
 
-// Definisikan routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/roles', roleRoutes);
+// Define API routes
+app.use("/api/users", userRoutes);
 
-app.get('/', (req, res) => {
-    res.send('Welcome to the API Nodejs Express Starter Kit');
+// Swagger documentation routes
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+
+// Middleware for logging HTTP requests
+app.use(
+  morgan("combined", {
+    stream: logger.stream, // Use custom logger for storing logs
+  })
+);
+
+// Root route for a simple response
+app.get("/", (req, res) => {
+  logger.info("Root endpoint accessed");
+  res.send("Trade Bot Application API");
 });
 
-const APP_PORT = process.env.APP_PORT || 3000;
-const APP_URL = process.env.APP_URL || "//localhost:";
+// Start the server
+const APP_PORT = process.env.APP_PORT || 3000; // Default to port 3000 if not set
+const APP_URL = process.env.APP_URL || "//localhost:"; // Default URL
 app.listen(APP_PORT, () => {
-    console.log(`Server is running on port ${APP_URL}:${APP_PORT}`);
+  console.log(`Server is running at ${APP_URL}:${APP_PORT}`);
 });
