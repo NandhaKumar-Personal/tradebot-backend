@@ -1,39 +1,41 @@
+const swaggerJSDoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+const fs = require("fs");
 const path = require("path");
-const swaggerJsdoc = require("swagger-jsdoc");
 
-const options = {
-  definition: {
+// Load YAML Swagger files dynamically from modules
+const getSwaggerDocs = () => {
+  const modulesPath = path.join(__dirname, "../endpoints");
+  const swaggerFiles = fs.readdirSync(modulesPath).flatMap((module) => {
+    const filePath = path.join(modulesPath, module, `${module}.swagger.yaml`);
+    return fs.existsSync(filePath) ? filePath : [];
+  });
+
+  const specs = swaggerFiles.map((file) => {
+    return require("yamljs").load(file);
+  });
+
+  return {
     openapi: "3.0.0",
     info: {
       title: "TradeBot API",
       version: "1.0.0",
-      description: "API documentation for the TradeBot Application Backend",
     },
-    servers: [
-      {
-        url: "http://localhost:3000",
-        description: "Development server",
-      },
-    ],
-    components: {
-      securitySchemes: {
-        BearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT", // Indicate the format is JWT
-        },
-      },
-    },
-    security: [
-      {
-        BearerAuth: [], // Apply BearerAuth globally to all endpoints by default
-      },
-    ],
-  },
-  // Include all YAML files in the swagger folder
-  apis: [path.resolve(__dirname, "../swagger/*.yaml")],
+    paths: Object.assign({}, ...specs.map((spec) => spec.paths)),
+    components: Object.assign(
+      {},
+      ...specs.map((spec) => spec.components || {})
+    ),
+  };
 };
 
-const specs = swaggerJsdoc(options);
+const swaggerSpec = swaggerJSDoc({
+  definition: getSwaggerDocs(),
+  apis: [],
+});
 
-module.exports = specs;
+const setupSwagger = (app) => {
+  app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+};
+
+module.exports = setupSwagger;

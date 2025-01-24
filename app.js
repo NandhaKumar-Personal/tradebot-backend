@@ -1,52 +1,47 @@
+// File: app.js (main server file)
 const express = require("express");
-const swaggerUi = require("swagger-ui-express");
-const swaggerSpecs = require("./app/config/swagger");
 const dotenv = require("dotenv");
-const cors = require("cors"); // Import CORS for cross-origin resource sharing
-const userRoutes = require("./app/routes/userRoutes");
-const morgan = require("morgan"); // Import Morgan for HTTP request logging
-const logger = require("./app/utils/logger"); // Custom logger
+const cors = require("cors");
+const path = require("path");
+const loadModules = require("./routes");
+const setupSwagger = require("./app/config/swagger");
+const {
+  globalLogger,
+  requestResponseLogger,
+} = require("./app/middlewares/globalLogger");
 
-dotenv.config(); // Load environment variables from .env file
+dotenv.config();
 
 const app = express();
-
-// Enable CORS for all routes
+app.use(express.json());
 app.use(cors());
 
-// Optional: Use specific CORS options
-// const corsOptions = {
-//   origin: 'http://localhost:3000', // Replace with the allowed domain
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-// };
-// app.use(cors(corsOptions));
+// Log server startup
+globalLogger.info("Server is starting...");
 
-// Parse incoming JSON requests
-app.use(express.json());
+// Apply global request/response logger
+app.use(requestResponseLogger);
 
-// Define API routes
-app.use("/api/users", userRoutes);
+// Dynamically load all module routes
+loadModules(app);
 
-// Swagger documentation routes
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+// Setup Swagger
+setupSwagger(app);
 
-// Middleware for logging HTTP requests
-app.use(
-  morgan("combined", {
-    stream: logger.stream, // Use custom logger for storing logs
-  })
-);
-
-// Root route for a simple response
-app.get("/", (req, res) => {
-  logger.info("Root endpoint accessed");
-  res.send("Trade Bot Application API");
+// Global error handler
+app.use((err, req, res, next) => {
+  globalLogger.error("Unhandled error occurred", {
+    error: err.message,
+    stack: err.stack,
+    method: req.method,
+    path: req.originalUrl,
+    ip: req.ip,
+  });
+  res.status(500).json({ message: "Something went wrong!" });
 });
 
 // Start the server
-const APP_PORT = process.env.APP_PORT || 3000; // Default to port 3000 if not set
-const APP_URL = process.env.APP_URL || "//localhost:"; // Default URL
-app.listen(APP_PORT, () => {
-  console.log(`Server is running at ${APP_URL}:${APP_PORT}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  globalLogger.info("Server is running", { url: `http://localhost:${PORT}` });
 });
