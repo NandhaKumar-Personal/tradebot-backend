@@ -9,7 +9,6 @@ const userLogger = createModuleLogger("user");
 
 const router = express.Router();
 
-// Log incoming requests
 router.use((req, res, next) => {
   userLogger.info("Request received", {
     ip: req.ip,
