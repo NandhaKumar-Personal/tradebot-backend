@@ -1,12 +1,31 @@
-import createModuleLogger from "../../utils/createModuleLogger.js";
-const logger = createModuleLogger("user");
+import jwt from "jsonwebtoken";
 
-export function getUser(req, res) {
-  logger.info("Fetching all users"); // Log specific to the user module
-  res.json({ message: "Fetch all users" });
-}
+const JWT_SECRET = process.env.JWT_SECRET;
 
-export function createUser(req, res) {
-  logger.info("Creating a new user with data:", req.body); // Log specific to the user module
-  res.json({ message: "User created successfully", data: req.body });
-}
+export const createJwtHandler = (req, res) => {
+  const { username, password } = req.body;
+
+  // You should validate the credentials (e.g., check if the user exists, etc.)
+  if (!username || !password) {
+    return res
+      .status(400)
+      .json({ error: "Username and password are required" });
+  }
+  const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "1h" }); // Token valid for 1 hour
+
+  res.json({ token });
+};
+
+export const verifyJwtHandler = (req, res) => {
+  console.log("Verifying JWT...", req);
+
+  const { jwtDetails } = req;
+
+  if (!jwtDetails) {
+    return res
+      .status(401)
+      .json({ error: "sdfsdfsdfsdfsfNo token provided or expired token" });
+  }
+
+  res.json({ message: "JWT is valid", jwtDetails });
+};

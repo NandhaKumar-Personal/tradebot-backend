@@ -159,15 +159,9 @@ Make Model and Migration
 npx sequelize-cli model:generate --name users --attributes name:string,email:string,password:string,role:string
 ```
 
-# Make JWT Secret
+## create endpoints folder
 
-```plaintext
-node generate-secret.js
-```
-
-## Frontend
-
-[Starter Kit Frontend React JS](https://github.com/SyahrulRomadoni/reactjs-vite-starter-kit)
+npm run create-endpoint --name auth
 
 ## Library
 

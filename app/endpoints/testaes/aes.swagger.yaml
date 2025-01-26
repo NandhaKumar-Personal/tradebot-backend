@@ -1,0 +1,77 @@
+openapi: 3.0.0
+info:
+  title: AES Encryption API
+  description: API for AES encryption and decryption of data.
+  version: 1.0.0
+paths:
+  /aes/encrypt:
+    post:
+      summary: Encrypt data using AES-256
+      description: This endpoint encrypts the provided data using AES-256 encryption.
+      operationId: encryptData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  description: The data to be encrypted
+                  example:
+                    name: "John Doe"
+                    email: "john@example.com"
+      responses:
+        200:
+          description: Successfully encrypted data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  encryptedData:
+                    type: string
+                    description: The encrypted data
+                    example: "U2FsdGVkX1+L2Kb9bMLy5m/ZP9OrZFiw0VzZ0dFr1P..."
+
+        400:
+          description: Bad Request - Missing or invalid data
+        500:
+          description: Internal Server Error - Encryption failed
+
+  /aes/decrypt:
+    post:
+      summary: Decrypt encrypted data using AES-256
+      description: This endpoint decrypts the provided encrypted data using AES-256 encryption.
+      operationId: decryptData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                encryptedData:
+                  type: string
+                  description: The encrypted data to be decrypted
+                  example: "U2FsdGVkX1+L2Kb9bMLy5m/ZP9OrZFiw0VzZ0dFr1P..."
+      responses:
+        200:
+          description: Successfully decrypted data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  decryptedData:
+                    type: object
+                    description: The decrypted data
+                    example:
+                      name: "John Doe"
+                      email: "john@example.com"
+
+        400:
+          description: Bad Request - Missing or invalid encrypted data
+        500:
+          description: Internal Server Error - Decryption failed

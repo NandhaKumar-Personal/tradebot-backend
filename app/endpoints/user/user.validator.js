@@ -1,7 +1,14 @@
-export function validateUser(req, res, next) {
-  const { name, email } = req.body;
-  if (!name || !email) {
-    return res.status(400).json({ message: "Name and email are required" });
-  }
-  next();
-}
+// app/middlewares/validate.js
+import { body, validationResult } from "express-validator";
+
+export const validate = [
+  body("username").notEmpty().withMessage("Username is required"),
+  body("password").notEmpty().withMessage("Password is required"),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  },
+];

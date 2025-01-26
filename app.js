@@ -9,6 +9,8 @@ import loadEndpoints from "./routes.js";
 import setupSwagger from "./app/config/swagger.js";
 import sequelizeModule from "./app/db/sequelize.js";
 import globalLoggerModule from "./app/middlewares/globalLogger.js";
+import loadRoutes from "./routes/index.js";
+import { Endpoint } from "./app/utils/Endpoint/endpoint.js";
 
 const { sequelize, checkPendingMigrations, runPendingMigrations } =
   sequelizeModule;
@@ -48,7 +50,11 @@ checkPendingMigrations()
       app.use(requestResponseLogger);
 
       // Dynamically load all module routes
-      loadEndpoints(app);
+      // loadEndpoints(app);
+      loadRoutes(app);
+
+      // Error handling
+      app.use(Endpoint.createErrorHandler());
 
       // Health check route
       app.get("/health", (req, res) => {

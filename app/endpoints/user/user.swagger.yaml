@@ -1,17 +1,79 @@
 openapi: 3.0.0
 info:
-  title: User API
-  description: User management endpoints, with a test route
+  title: JWT Authentication API
+  description: API for creating and verifying JWT tokens.
   version: 1.0.0
 paths:
-  /api/user/test:
-    get:
-      summary: Test route
+  /createjwt:
+    post:
+      summary: Generate a new JWT token
+      description: This endpoint generates a new JWT token based on the provided username and password.
+      operationId: createJwt
       tags:
-        - User
+        - Auth
+      requestBody:
+        description: User login information to generate JWT
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: The username of the user
+                  example: john_doe
+                password:
+                  type: string
+                  description: The password of the user
+                  example: password123
       responses:
-        200:
-          description: Successful response
+        "200":
+          description: Successfully generated JWT token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: The generated JWT token
+                    example: "generated-jwt-token"
+        "400":
+          description: Missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Username and password are required"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "An unexpected error occurred."
+
+  /verifyjwt:
+    get:
+      summary: Verify the JWT token
+      description: This endpoint verifies the provided JWT token and returns the decoded JWT details.
+      operationId: verifyJwt
+      tags:
+        - Auth
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: JWT token is valid
           content:
             application/json:
               schema:
@@ -19,5 +81,43 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Test route is working!"
-components: {}
+                    example: "JWT is valid"
+                  jwtDetails:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                        example: "john_doe"
+                      iat:
+                        type: integer
+                        example: 1622021075
+                      exp:
+                        type: integer
+                        example: 1622024675
+        "401":
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid or expired token"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "An unexpected error occurred."
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
