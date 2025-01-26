@@ -1,20 +1,27 @@
-const { Sequelize } = require("sequelize");
-const { Umzug, SequelizeStorage } = require("umzug"); // Use SequelizeStorage
-const path = require("path");
-const config =
-  require("./config/config")[process.env.NODE_ENV || "development"];
+import { Sequelize } from "sequelize";
+import { Umzug, SequelizeStorage } from "umzug"; // Use SequelizeStorage
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
+import { development, test, production } from "./config/config.js"; // Named imports
+
+// Get __dirname equivalent in ES modules
+
+const environment = process.env.NODE_ENV || "development";
+const dbConfig = { development, test, production }[environment]; // Dynamically select environment config
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Initialize Sequelize
 const sequelize = new Sequelize(
-  config.database,
-  config.username,
-  config.password,
+  dbConfig.database,
+  dbConfig.username,
+  dbConfig.password,
   {
-    host: config.host,
-    dialect: config.dialect,
+    host: dbConfig.host,
+    dialect: dbConfig.dialect,
     logging: console.log, // Optional: Customize logging (use `false` to disable logging)
   }
 );
+
 const testConnection = async () => {
   try {
     await sequelize.authenticate();
@@ -30,7 +37,7 @@ const checkPendingMigrations = async () => {
   try {
     const umzug = new Umzug({
       migrations: {
-        glob: path.resolve(__dirname, "../migrations/*.js"), // Path to migration files
+        glob: resolve(__dirname, "../migrations/*.js"), // Path to migration files
       },
       storage: new SequelizeStorage({ sequelize }),
       context: sequelize.getQueryInterface(),
@@ -59,7 +66,7 @@ const runPendingMigrations = async () => {
   try {
     const umzug = new Umzug({
       migrations: {
-        glob: path.resolve(__dirname, "./migrations/*.js"), // Path to migration files
+        glob: resolve(__dirname, "./migrations/*.js"), // Path to migration files
       },
       storage: new SequelizeStorage({ sequelize }),
       context: sequelize.getQueryInterface(),
@@ -81,7 +88,7 @@ const runPendingMigrations = async () => {
   }
 };
 
-module.exports = {
+export default {
   sequelize,
   testConnection,
   checkPendingMigrations,

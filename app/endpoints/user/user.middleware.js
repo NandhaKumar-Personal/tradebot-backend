@@ -1,7 +1,7 @@
-const createModuleLogger = require("../../utils/createModuleLogger");
+import createModuleLogger from "../../utils/createModuleLogger";
 const logger = createModuleLogger("user");
 
-exports.authenticate = (req, res, next) => {
+export function authenticate(req, res, next) {
   logger.info("Authenticating user for path: " + req.originalUrl);
   const token = req.headers.authorization;
   if (!token) {
@@ -11,4 +11,4 @@ exports.authenticate = (req, res, next) => {
   // Example token validation logic
   logger.info("User authenticated successfully");
   next();
-};
+}

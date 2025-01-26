@@ -1,6 +1,6 @@
 // utils/Endpoint.js
-const express = require("express");
-const { jwtAuth, staticAuth } = require("./middlewares/authMiddleware");
+import express from "express";
+import { jwtAuth, staticAuth } from "./middlewares/authMiddleware";
 
 class Endpoint {
   constructor({ path, method, handler, authType = "NONE", validator = null }) {
@@ -31,4 +31,4 @@ class Endpoint {
   }
 }
 
-module.exports = Endpoint;
+export default Endpoint;

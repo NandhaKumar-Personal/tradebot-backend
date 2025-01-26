@@ -1,1 +1,1 @@
-module.exports = require("./user.routes");
+export { default } from "./user.routes.js";

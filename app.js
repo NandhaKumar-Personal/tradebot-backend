@@ -1,26 +1,29 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const cors = require("cors");
-const helmet = require("helmet");
-const path = require("path");
-const loadModules = require("./routes");
-const setupSwagger = require("./app/config/swagger");
-const {
-  sequelize,
-  checkPendingMigrations,
-  runPendingMigrations,
-} = require("./app/db/sequelize");
-const {
-  globalLogger,
-  requestResponseLogger,
-} = require("./app/middlewares/globalLogger");
+import express, { json, static as serveStatic } from "express";
+import { config } from "dotenv";
+import cors from "cors";
+import helmet from "helmet";
+import { join } from "path";
+import { fileURLToPath } from "url"; // Import fileURLToPath
+import { dirname } from "path"; // Import dirname
+import loadEndpoints from "./routes.js";
+import setupSwagger from "./app/config/swagger.js";
+import sequelizeModule from "./app/db/sequelize.js";
+import globalLoggerModule from "./app/middlewares/globalLogger.js";
 
-dotenv.config();
+const { sequelize, checkPendingMigrations, runPendingMigrations } =
+  sequelizeModule;
+const { globalLogger, requestResponseLogger } = globalLoggerModule;
+
+config();
+
+// Set up __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 
 // Middleware
-app.use(express.json());
+app.use(json());
 app.use(cors());
 app.use(helmet());
 
@@ -45,7 +48,7 @@ checkPendingMigrations()
       app.use(requestResponseLogger);
 
       // Dynamically load all module routes
-      loadModules(app);
+      loadEndpoints(app);
 
       // Health check route
       app.get("/health", (req, res) => {
@@ -56,7 +59,7 @@ checkPendingMigrations()
       setupSwagger(app);
 
       // Static file serving
-      app.use(express.static(path.join(__dirname, "public")));
+      app.use(serveStatic(join(__dirname, "public"))); // Updated with new __dirname
 
       // Global error handler
       app.use((err, req, res, next) => {

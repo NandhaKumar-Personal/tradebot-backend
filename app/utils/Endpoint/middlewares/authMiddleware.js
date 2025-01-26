@@ -1,5 +1,5 @@
 // middlewares/authMiddleware.js
-const jwt = require("jsonwebtoken");
+import { verify } from "jsonwebtoken";
 
 // JWT Authentication Middleware
 const jwtAuth = (req, res, next) => {
@@ -7,7 +7,7 @@ const jwtAuth = (req, res, next) => {
   if (!token) return res.status(401).json({ error: "No token provided" });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
   } catch (err) {
@@ -24,4 +24,4 @@ const staticAuth = (req, res, next) => {
   res.status(401).json({ error: "Unauthorized" });
 };
 
-module.exports = { jwtAuth, staticAuth };
+export default { jwtAuth, staticAuth };

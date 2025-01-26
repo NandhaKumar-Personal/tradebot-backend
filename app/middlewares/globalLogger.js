@@ -1,12 +1,19 @@
-// File: app/middlewares/globalLogger.js
-const winston = require("winston");
-const path = require("path");
+import {
+  createLogger,
+  format as _format,
+  transports as _transports,
+} from "winston";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
-const globalLogger = winston.createLogger({
+// Get __dirname equivalent in ES modules
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const globalLogger = createLogger({
   level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message, ...meta }) => {
+  format: _format.combine(
+    _format.timestamp(),
+    _format.printf(({ timestamp, level, message, ...meta }) => {
       const metaDetails = Object.keys(meta)
         .map((key) => `${key}: ${JSON.stringify(meta[key])}`)
         .join(", ");
@@ -16,10 +23,10 @@ const globalLogger = winston.createLogger({
     })
   ),
   transports: [
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.printf(({ timestamp, level, message, ...meta }) => {
+    new _transports.Console({
+      format: _format.combine(
+        _format.colorize(),
+        _format.printf(({ timestamp, level, message, ...meta }) => {
           const metaDetails = Object.keys(meta)
             .map((key) => `${key}: ${JSON.stringify(meta[key])}`)
             .join(", ");
@@ -29,8 +36,8 @@ const globalLogger = winston.createLogger({
         })
       ),
     }),
-    new winston.transports.File({
-      filename: path.join(__dirname, "../../logs/global.log"),
+    new _transports.File({
+      filename: join(__dirname, "../../logs/global.log"),
     }),
   ],
 });
@@ -54,7 +61,7 @@ const requestResponseLogger = (req, res, next) => {
   next();
 };
 
-module.exports = {
+export default {
   globalLogger,
   requestResponseLogger,
 };

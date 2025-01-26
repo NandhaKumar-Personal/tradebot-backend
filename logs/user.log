@@ -1,10 +1,2 @@
-[2025-01-25T04:56:37.413Z] [USER] [INFO]: Request received | ip: ::1, method: GET, path: /api/user/okuser
-[2025-01-25T04:56:37.418Z] [USER] [INFO]: Accessed /okuser endpoint | ip: ::1
-[2025-01-25T04:57:26.213Z] [USER] [INFO]: Request received | ip: ::1, method: GET, path: /api/user/okuser
-[2025-01-25T04:57:26.215Z] [USER] [INFO]: Accessed /okuser endpoint | ip: ::1
-[2025-01-25T04:57:42.025Z] [USER] [INFO]: Request received | ip: ::1, method: GET, path: /api/user/okuser
-[2025-01-25T04:57:42.029Z] [USER] [INFO]: Accessed /okuser endpoint | ip: ::1
-[2025-01-25T04:57:51.758Z] [USER] [INFO]: Request received | ip: ::1, method: GET, path: /api/user/okuser
-[2025-01-25T04:57:51.764Z] [USER] [INFO]: Accessed /okuser endpoint | ip: ::1
-[2025-01-25T04:58:02.559Z] [USER] [INFO]: Request received | ip: ::ffff:127.0.0.1, method: GET, path: /api/user/okuser
-[2025-01-25T04:58:02.560Z] [USER] [INFO]: Accessed /okuser endpoint | ip: ::ffff:127.0.0.1
+[2025-01-26T04:10:55.036Z] [USER] [INFO]: Test route accessed 
+[2025-01-26T04:11:23.290Z] [USER] [INFO]: Test route accessed 

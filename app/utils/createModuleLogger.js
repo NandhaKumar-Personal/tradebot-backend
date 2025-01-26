@@ -1,20 +1,24 @@
-// File: app/utils/createModuleLogger.js
-const winston = require("winston");
-const path = require("path");
+import {
+  createLogger,
+  format as _format,
+  transports as _transports,
+} from "winston";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const createModuleLogger = (moduleName) => {
-  const logFilePath = path.join(__dirname, "../../logs", `${moduleName}.log`);
-
-  // Determine if the module is active for console logging
+  const logFilePath = join(__dirname, "../../logs", `${moduleName}.log`);
   const isActiveModule =
     process.env.LOG_MODULE &&
     process.env.LOG_MODULE.split(",").includes(moduleName);
 
-  const logger = winston.createLogger({
+  const logger = createLogger({
     level: "info",
-    format: winston.format.combine(
-      winston.format.timestamp(),
-      winston.format.printf(({ timestamp, level, message, ...meta }) => {
+    format: _format.combine(
+      _format.timestamp(),
+      _format.printf(({ timestamp, level, message, ...meta }) => {
         const metaDetails = Object.keys(meta)
           .map((key) => `${key}: ${meta[key]}`)
           .join(", ");
@@ -24,11 +28,10 @@ const createModuleLogger = (moduleName) => {
       })
     ),
     transports: [
-      // Console transport: logs only for active modules
-      new winston.transports.Console({
-        format: winston.format.combine(
-          winston.format.colorize(),
-          winston.format.printf(({ timestamp, level, message, ...meta }) => {
+      new _transports.Console({
+        format: _format.combine(
+          _format.colorize(),
+          _format.printf(({ timestamp, level, message, ...meta }) => {
             const metaDetails = Object.keys(meta)
               .map((key) => `${key}: ${meta[key]}`)
               .join(", ");
@@ -37,10 +40,9 @@ const createModuleLogger = (moduleName) => {
             }`;
           })
         ),
-        silent: !isActiveModule, // Only log to console if the module is active
+        silent: !isActiveModule,
       }),
-      // File transport: logs all messages regardless of module activation
-      new winston.transports.File({
+      new _transports.File({
         filename: logFilePath,
       }),
     ],
@@ -49,4 +51,4 @@ const createModuleLogger = (moduleName) => {
   return logger;
 };
 
-module.exports = createModuleLogger;
+export default createModuleLogger;

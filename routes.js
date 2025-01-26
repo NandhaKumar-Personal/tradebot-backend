@@ -1,17 +1,37 @@
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
+import { readdirSync, existsSync } from "fs";
+import { resolve } from "path";
+import { fileURLToPath } from "url";
 
-function loadModules(app) {
-  const modulesPath = path.join(__dirname, "app", "endpoints");
+export default async function loadEndpoints(app) {
+  const __dirname = fileURLToPath(new URL(".", import.meta.url));
+  const modulesPath = resolve(__dirname, "app", "endpoints");
 
-  fs.readdirSync(modulesPath).forEach((module) => {
-    const moduleIndex = path.join(modulesPath, module, "index.js");
-    if (fs.existsSync(moduleIndex)) {
-      const routes = require(moduleIndex);
-      app.use(`/api/${module}`, routes);
+  if (existsSync(modulesPath)) {
+    console.log(`Loading endpoints from: ${modulesPath}`);
+    const modules = readdirSync(modulesPath, { withFileTypes: true });
+
+    for (const module of modules) {
+      if (module.isDirectory()) {
+        const moduleIndex = resolve(modulesPath, module.name, "index.js");
+        if (existsSync(moduleIndex)) {
+          try {
+            const normalizedPath = moduleIndex.replace(/\\/g, "/");
+            const moduleURL = new URL(`file://${normalizedPath}`);
+            const routes = await import(moduleURL.href);
+            app.use(`/api/${module.name}`, routes.default);
+            console.log(`Loaded routes for module: /api/${module.name}`);
+          } catch (error) {
+            console.error(`Failed to load routes for module: ${module.name}`);
+            console.error(error);
+          }
+        } else {
+          console.warn(`No index.js found in module directory: ${module.name}`);
+        }
+      }
     }
-  });
+  } else {
+    console.error(
+      `The "endpoints" directory does not exist at path: ${modulesPath}`
+    );
+  }
 }
-
-module.exports = loadModules;

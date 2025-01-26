@@ -1,6 +1,6 @@
-const { Sequelize } = require("sequelize");
-const { Umzug, SequelizeStorage } = require("umzug");
-const path = require("path");
+import { Sequelize } from "sequelize";
+import { Umzug, SequelizeStorage } from "umzug";
+import { resolve } from "path";
 
 // Initialize Sequelize using your configuration
 const config =
@@ -19,7 +19,7 @@ const runPendingMigrations = async () => {
   try {
     const umzug = new Umzug({
       migrations: {
-        glob: path.resolve(__dirname, "../migrations/*.js"), // Path to migration files
+        glob: resolve(__dirname, "../migrations/*.js"), // Path to migration files
       },
       storage: new SequelizeStorage({ sequelize }),
       context: sequelize.getQueryInterface(),
@@ -41,4 +41,4 @@ const runPendingMigrations = async () => {
   }
 };
 
-module.exports = { runPendingMigrations };
+export default { runPendingMigrations };
